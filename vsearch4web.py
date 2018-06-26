@@ -4,17 +4,42 @@ from vsearch import search4letters
 
 app = Flask(__name__)
 
-def log_request(req: 'flask_request', res: str) -> None:
+def log_request_file(req: 'flask_request', res: str) -> None:
     with open('vsearch.log', 'a') as log:
         print(req.form, req.remote_addr, req.user_agent, res, file=log, sep='|')
 
+def log_request(req: 'flask request', res: str) -> None:
+    """Funkcja logująca do bazy danych mysql"""
+    dbconfig = {host: localhost,
+                user: vsearch,
+                password: vsearchpasswd,
+                database: vsearch,}
+
+    import.mysql.connector
+
+    conn = mysql.connector.connect(**dbconfig)
+    cursor = con.cursor()
+    _SQL = """INSERT INTO log
+           (pharse, letter, ip , browser_string, results)
+            VALUES
+           (%s, %s, %s, %s, %s)"""
+    cursor.execute(_SQL, (req.form['pharse'],
+                          req.form['letters'],
+                          req.remote_addr,
+                          req.user_agent.browser,
+                          res, ))
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    
 @app.route('/search4', methods=['POST'])
 def do_search() -> 'html':
     pharse = request.form['pharse']
     letters = request.form['letters']
     title = 'Oto Twoje wyniki:'
     results = str(search4letters(pharse,letters))
-    log_request(request,results)
+    log_request_file(request,results)
     return render_template('results.html',
                             the_title = title,
                             the_pharse = pharse,
