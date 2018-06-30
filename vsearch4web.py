@@ -10,17 +10,17 @@ def log_request_file(req: 'flask_request', res: str) -> None:
 
 def log_request(req: 'flask request', res: str) -> None:
     """Funkcja logująca do bazy danych mysql"""
-    dbconfig = {host: localhost,
-                user: vsearch,
-                password: vsearchpasswd,
-                database: vsearch,}
+    dbconfig = {'host': 'localhost',
+                'user': 'vsearch',
+                'password': 'vsearchpasswd',
+                'database': 'vsearchlogDB',}
 
-    import.mysql.connector
+    import mysql.connector
 
     conn = mysql.connector.connect(**dbconfig)
-    cursor = con.cursor()
+    cursor = conn.cursor()
     _SQL = """INSERT INTO log
-           (pharse, letter, ip , browser_string, results)
+           (pharse, letters, ip , browser_string, results)
             VALUES
            (%s, %s, %s, %s, %s)"""
     cursor.execute(_SQL, (req.form['pharse'],
@@ -40,6 +40,7 @@ def do_search() -> 'html':
     title = 'Oto Twoje wyniki:'
     results = str(search4letters(pharse,letters))
     log_request_file(request,results)
+    log_request(request,results)
     return render_template('results.html',
                             the_title = title,
                             the_pharse = pharse,
