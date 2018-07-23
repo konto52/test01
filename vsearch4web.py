@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, escape, session
 from vsearch import search4letters
 
-from DBcm import UseDatabase
+from DBcm import UseDatabase, ConnectionError, CredentialError, SQLError
 from checker import check_logged_in
 
 app = Flask(__name__)
@@ -50,7 +50,10 @@ def do_search() -> 'html':
     title = 'Oto Twoje wyniki:'
     results = str(search4letters(pharse,letters))
 #    log_request_file(request,results)
-    log_request(request,results)
+    try:
+        log_request(request,results)
+    except Exception as err:
+        print('***** Logowanie się nie powiodło; wystąpił błąd:' str(err))
     return render_template('results.html',
                             the_title = title,
                             the_pharse = pharse,
