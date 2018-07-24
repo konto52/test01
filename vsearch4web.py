@@ -53,7 +53,7 @@ def do_search() -> 'html':
     try:
         log_request(request,results)
     except Exception as err:
-        print('***** Logowanie się nie powiodło; wystąpił błąd:' str(err))
+        print('***** Logowanie się nie powiodło; wystąpił błąd:', str(err))
     return render_template('results.html',
                             the_title = title,
                             the_pharse = pharse,
@@ -82,16 +82,25 @@ def view_the_log_file() -> 'html':
 @app.route('/viewlog')
 @check_logged_in
 def view_the_log() -> 'html':
-    with UseDatabase(app.config['dbconfig']) as cursor:
-        _SQL = """select pharse, letters, ip, browser_string, results
-                  from log"""
-        cursor.execute(_SQL)
-        contents = cursor.fetchall()
-        titles = ('Fraza', 'Litery', 'Adres klienta', 'Agent użytkownika', 'Wynik')
-        return render_template('viewlog.html',
-                               the_title='Widok logu',
-                               the_row_titles=titles,
-                               the_data=contents,)
+    try:
+        with UseDatabase(app.config['dbconfig']) as cursor:
+            _SQL = """select pharse, letters, ip, browser_string, results
+                      from log"""
+            cursor.execute(_SQL)
+            contents = cursor.fetchall()
+            titles = ('Fraza', 'Litery', 'Adres klienta', 'Agent użytkownika', 'Wynik')
+            return render_template('viewlog.html',
+                                   the_title='Widok logu',
+                                   the_row_titles=titles,
+                                   the_data=contents,)
+    except ConnectionError as err:
+        print('Czy twoja baza danych jest włączona? Błąd: ',str(err))
+    except CredentialError as err:
+        print('Problem z identyfikatorem użytkownika lub hasłem. Błąd: ',str(err))
+    except SQLError as err:
+        print('Czy Twoje zapytanie jest poprawne? Błąd: ',str(err))
+    except Exception as err:
+        print('Coś poszło źle. Błąd: ',str(err))
 
 
 app.secret_key = 'Super tajne haslo'
